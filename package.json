@@ -4,6 +4,7 @@
   "description": "Week 11 Homework",
   "main": "constructor-hangman.js",
   "dependencies": {
+    "chalk": "^2.3.0",
     "inquirer": "^4.0.1"
   },
   "devDependencies": {},
