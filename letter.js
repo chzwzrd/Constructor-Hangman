@@ -1,17 +1,16 @@
 // import word module
-var Word = require('./word');
+var inquirer = require('inquirer');
 
 // create Letter constructor
-function Letter(guessesLeft) {
-    this.guessesLeft = guessesLeft;
+function Letter(letter) {
+    this.letter = letter;
 }
 
-Letter.prototype.newWord = function() {
-    var xmasBank = ['christmas', 'holiday', 'vacation', 'santa', 'reindeer', 'snow', 'rudolph', 'elf', 'presents', 'winter', 'carols', 'lights', 'wreath', 'sleigh', 'snowman'];
-    var newWord = new Word(xmasBank);
+Letter.prototype.validateLetter = function() {
+    // validate whether it's a letter (vs number, symbol, etc.)
 }
 
-Letter.prototype.checkLetter = function() {
+Letter.prototype.compareLetter = function() {
     inquirer.prompt(
         {
             name: 'userGuess',
@@ -33,7 +32,7 @@ Letter.prototype.checkLetter = function() {
                         message: 'Play again?'
                     }).then((answer) => {
                         if (answer.playAgain === true) {
-                            this.newWord();
+                            var newWord = new Word();
                             this.checkLetter();
                         } else {
                             console.log('Sayonara~');
@@ -60,7 +59,7 @@ Letter.prototype.checkLetter = function() {
                 message: 'Play again?'
             }).then((answer) => {
                 if (answer.playAgain === true) {
-                    this.newWord();
+                    var newWord = new Word();
                     this.checkLetter();
                 } else {
                     console.log('Sayonara~');
