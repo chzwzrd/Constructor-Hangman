@@ -7,6 +7,7 @@ var Word = require('./Word');
 var wordBank = ['christmas', 'holiday', 'vacation', 'santa', 'reindeer', 'snow', 'rudolph', 'elf', 'presents', 'winter', 'carols', 'lights', 'wreath', 'sleigh', 'snowman'];
 
 var guessesLeft = 10;
+var currentGuesses = [];
 
 
 // FUNCTIONS
@@ -15,112 +16,133 @@ function generateWord() {
     return wordBank[Math.floor(Math.random() * wordBank.length)];
 }
 
-function displayWord() {
+function displayNewWord() {
     currentWord = generateWord();
-    console.log(currentWord);
-    var underscores = [];
+    console.log(`\n\t${currentWord}\n`);
+    underscores = [];
     for (var i = 0; i < currentWord.length; i++) {
         underscores.push('_');
     }
-    console.log(underscores.join(' '));
+    console.log(`\n\t${underscores.join(' ')}\n`);
 }
 
-function promptUser() {
+// // check if letter is in the alphabet
+// function checkCharacter(letter) {
+//     return letter.match(alphabet).length > 0;
+// }
 
+// check if/where letter belongs in word
+function checkIndex(letter) {
+    return currentWord.includes(letter);
 }
 
-function rightGuess() {
-
+// check if letter has already been guessed
+function checkRepeat(letter) {
+    return currentGuesses.join('').includes(letter);
 }
 
-function wrongGuess() {
-
+function checkGuesses(num) {
+    return num > 0;
 }
 
-function userWin() {
-
-}
-
-function userLose() {
-
-}
-
-function checkLetter() {
+function updateWord() {
     inquirer.prompt(
         {
             name: 'guess',
             type: 'input',
-            message: 'Guess a letter!'
+            message: 'Guess a letter!',
+            // check if letter is in alphabet
+            validate: (value) => {
+                if (typeof value === 'string') {
+                    return true;
+                } else {
+                    return 'Please enter a letter';
+                }
+            }
         }
     ).then((answer) => {
-        // if guesses > 0
-        if (guessesLeft > 0) {
-            // if user's guess is correct
-            if (currentWord.includes(answer.guess)) {
-                // if user completes word
-                if (answer.guess === currentWord) {
-                    // display win message
-                    console.log(`CONGRATS, YOU WON!!! The word was '${currentWord}'.`);
-                    inquirer.prompt({
-                        name: 'playAgain',
-                        type: 'confirm',
-                        message: 'Play again?'
-                    }).then((answer) => {
-                        if (answer.playAgain === true) {
-                            displayWord();
-                            checkLetter();
-                        } else {
-                            console.log('Sayonara~');
-                        }
-                    });
-                } else { // if word has not been guessed
-                    console.log('CORRECT!!!');
-                    // display letter at appropriate index
-                    currentWord.indexOf(answer.guess) = answer.guess;
-                    console.log(currentWord);
+        // var isLetter = checkCharacter(answer.guess);
+        var isInWord = checkIndex(answer.guess);
+        var hasBeenGuessed = checkRepeat(answer.guess);
+
+        currentGuesses.push(answer.guess);
+
+        // if letter has already been guessed
+        if (hasBeenGuessed) {
+            console.log(`\n\tYou already guessed ${answer.guess}!\n`);
+            updateWord();
+        }
+        // if letter has not been guessed yet
+        else {
+            // if user's guess belongs in word
+            if (isInWord) {
+
+                console.log('\n\tCORRECT!!!\n');
+
+                // find all indices of letter
+                var indices = [];
+                for (var i = 0; i < currentWord.length; i++) {
+                    if (currentWord[i] === answer.guess) {
+                        indices.push(i);
+                    }
                 }
-            } else { // if user's guess is wrong
-                console.log('INCORRECT!!!');
-                // decrement guesses left
-                guessesLeft--;
-                console.log(`${guessesLeft} remaining!!!`);
-                console.log(currentWord);
+
+                // update the appropriate underscores
+                for (var i = 0; i < underscores.length; i++) {
+                    underscores[indices[i]] = answer.guess;
+                }
+
+                console.log(`\n\t${underscores.join(' ')}\n`);
+                updateWord();
+                checkWinOrLose();
             }
-        } else { // if user has 0 guesses left
-            console.log(`Oh no, the word was ${currentWord} ):`);
-            // ask user if they would like to play again (inquirer confirm)
-            inquirer.prompt({
-                name: 'playAgain',
-                type: 'confirm',
-                message: 'Play again?'
-            }).then((answer) => {
-                if (answer.playAgain === true) {
-                    displayWord();
-                    checkLetter();
-                } else {
-                    console.log('Sayonara~');
-                }
-            });
+            // if user's guess does not belong in word
+            else {
+                console.warn('\n\tINCORRECT!!!\n');
+                guessesLeft--;
+                console.log(`\n\t${guessesLeft} guesses remaining!!!\n`);
+                updateWord();
+                checkWinOrLose();
+            }
         }
     });
 }
 
-function initGame() {
-    inquirer.prompt(
-        {
-            name: 'startGame',
+function checkWinOrLose() {
+    // If guesses run out (user loses)
+    if (guessesLeft === 0) {
+        console.log(`\n\tOh no! The word was '${currentWord}' ):\n`);
+        guessesLeft = 10;
+        currentGuesses = [];
+        // ask user if they would like to play again (inquirer confirm)
+        inquirer.prompt({
+            name: 'playAgain',
             type: 'confirm',
-            message: 'Welcome to Constructor Hangman! Press enter to start playing.'
-        }
-    ).then((answer) => {
-        if (answer.startGame === true) {
-            displayWord();
-            checkLetter();
-        } else {
-            console.log('Sayonara~');
-            return;
-        }
-    });
+            message: 'Play again?'
+        }).then((answer) => {
+            if (answer.playAgain === true) {
+                initGame();
+            } else {
+                console.log('\n\tSayonara~\n');
+            }
+        });
+    }
+    // If user still has guesses left and guesses entire word (user wins)
+    else if (underscores.join('') === currentWord) {
+        // display win message
+        console.log(`\n\tCongrats, you won!!! The word was '${currentWord}'.\n`);
+        inquirer.prompt({
+            name: 'playAgain',
+            type: 'confirm',
+            message: 'Play again?'
+        }).then((answer) => {
+            if (answer.playAgain === true) {
+                initGame();
+            } else {
+                console.log('\n\tSayonara~\n');
+            }
+        });
+    }
 }
 
 
