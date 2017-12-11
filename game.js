@@ -13,114 +13,30 @@ var currentGuesses = [];
 
 // FUNCTIONS
 // ====================================================================================
+// return a random word from wordBank
 function generateWord() {
     return wordBank[Math.floor(Math.random() * wordBank.length)];
 }
 
+// display the random word as underscores
 function displayNewWord() {
+
+    // capture the random word in a variable
     currentWord = generateWord();
+
+    // // console insight
     // console.log(`\n\t${currentWord}`);
+
+    // for every letter in the word, display it as an underscore
     wordDisplay = [];
     for (var i = 0; i < currentWord.length; i++) {
         wordDisplay.push('_');
     }
     console.log(`\n\t${wordDisplay.join(' ')}\n`);
+
 }
 
-function initGame() {
-    // prompt user if they want to play
-    inquirer.prompt(
-        {
-            name: 'startGame',
-            type: 'confirm',
-            message: 'Welcome to Constructor Hangman! Press enter to start playing.'
-        }
-    ).then((answer) => {
-        if (answer.startGame === true) {
-            displayNewWord();
-            askForGuess();
-        } else {
-            console.log(chalk.cyan.bold('\n\tSayonara~\n'));
-            return;
-        }
-    });
-}
-
-function askForGuess() {
-    // prompt user to guess letter
-    inquirer.prompt(
-        {
-            name: 'guess',
-            type: 'input',
-            message: 'Guess a letter!',
-            // check if letter is in alphabet
-            validate: (value) => {
-                var alphabet = 'abcdefghijklmnopqrstuvwxyz';
-                if (alphabet.includes(value.toLowerCase())) {
-                    return true;
-                } else {
-                    console.log(chalk.red(' => Please enter a letter'));
-                    return false;
-                }
-            }
-        }
-    ).then((answer) => {
-        handleLetter(answer.guess);
-    });
-}
-
-function handleLetter(letter) {
-    // var isLetter = checkCharacter(letter);
-    var isInWord = checkIndex(letter);
-    var hasBeenGuessed = checkRepeat(letter);
-    var hasGuessesLeft = checkGuesses(guessesLeft);
-
-    currentGuesses.push(letter);
-
-    // if user has guesses left
-    if (hasGuessesLeft) {
-        // if letter has already been guessed
-        if (hasBeenGuessed) {
-            console.log(chalk.blue.bold(`\n\tYou already guessed ${letter}!`));
-            displayCurrentWord();
-            askForGuess();
-        }
-        // if letter has not been guessed yet
-        else {
-            // if user's guess belongs in word
-            if (isInWord) {
-                
-                updateWord(letter);
-
-                // if user guesses word (wins)
-                if (wordDisplay.join('') === currentWord) {
-                    handleWin();
-                }
-                else {
-                    console.log(chalk.green('\n\tCORRECT!!!'));
-                    displayCurrentWord();
-                    askForGuess();
-                }
-            }
-            // if user's guess does not belong in word
-            else {
-                guessesLeft--;
-                console.log(chalk.red(`\n\tINCORRECT!!!\n\t${guessesLeft === 1 ? '1 more guess left' : guessesLeft + ' guesses remaining'}!!!`));
-                displayCurrentWord();
-                askForGuess();
-            }
-        }
-    }
-    // if user runs out of guesses (loses)
-    else {
-        handleLoss();
-    }
-}
-
-// // check if letter is in the alphabet
-// function checkCharacter(letter) {
-//     return letter.match(alphabet).length > 0;
-// }
+// ------------------------------------------------------------------------------------
 
 // check if/where letter belongs in word
 function checkIndex(letter) {
@@ -140,11 +56,77 @@ function checkWin(word) {
     return word === currentWord;
 }
 
-function displayCurrentWord() {
-    console.log(`\n\t${wordDisplay.join(' ')}\n`);
+// do all the letter checks
+function handleLetter(letter) {
+
+    // check if user has any guesses left
+    var hasGuessesLeft = checkGuesses(guessesLeft);
+
+    // check if letter has been guessed already
+    var hasBeenGuessed = checkRepeat(letter);
+
+    // check if letter belongs in the word
+    var isInWord = checkIndex(letter);
+
+    // log the letter to currentGuesses
+    currentGuesses.push(letter);
+
+    // if user still has guesses remaining
+    if (hasGuessesLeft) {
+
+        // if letter has already been guessed
+        if (hasBeenGuessed) {
+
+            console.log(chalk.blue.bold(`\n\tYou already guessed ${letter}!`));
+            displayCurrentWord();
+            askForGuess();
+
+        }
+
+        // if letter has not been guessed yet
+        else {
+
+            // if the letter belongs in the word
+            if (isInWord) {
+
+                // update the underscores with the letter at all indices
+                updateWord(letter);
+
+                // then...
+
+                // if this guess completes the word
+                if (wordDisplay.join('') === currentWord) {
+
+                    // user wins
+                    handleWin();
+                }
+                else {
+                    console.log(chalk.green('\n\tCORRECT!!!'));
+                    displayCurrentWord();
+                    askForGuess();
+                }
+            }
+            // if the letter does not belong in the word
+            else {
+                guessesLeft--;
+                console.log(chalk.red(`\n\tINCORRECT!!!\n\t${guessesLeft === 1 ? '1 more guess left' : guessesLeft + ' guesses remaining'}!!!`));
+                displayCurrentWord();
+                askForGuess();
+            }
+        }
+    }
+    // if user runs out of guesses
+    else {
+        // user loses
+        handleLoss();
+    }
 }
 
+// ------------------------------------------------------------------------------------
+
+// replace all of the appropriate underscores with the user's guess
 function updateWord(letter) {
+
     // find all indices of letter
     var indices = [];
     for (var i = 0; i < currentWord.length; i++) {
@@ -157,7 +139,15 @@ function updateWord(letter) {
     for (var i = 0; i < wordDisplay.length; i++) {
         wordDisplay[indices[i]] = letter.toLowerCase();
     }
+
 }
+
+// display the current underscores/letters
+function displayCurrentWord() {
+    console.log(`\n\t${wordDisplay.join(' ')}\n`);
+}
+
+// ------------------------------------------------------------------------------------
 
 function handleWin() {
     console.log(chalk.blue.bold(`\n\tCongrats, you won!!! The word was '${currentWord}'.\n`));
@@ -169,9 +159,39 @@ function handleLoss() {
     promptRestart();
 }
 
+// ------------------------------------------------------------------------------------
+
+// game start
+function initGame() {
+
+    // ask user if they want to play
+    inquirer.prompt(
+        {
+            name: 'startGame',
+            type: 'confirm',
+            message: 'Welcome to Constructor Hangman! Press enter to start playing.'
+        }
+    ).then((answer) => {
+        // if they want to play, generate/display new word & ask them to guess letter
+        if (answer.startGame === true) {
+            displayNewWord();
+            askForGuess();
+            // if they don't, display exit message
+        } else {
+            console.log(chalk.cyan.bold('\n\tSayonara~\n'));
+            return;
+        }
+    });
+
+}
+
+// ask if user wants to play again on win/lose
 function promptRestart() {
+
+    // reset stats
     guessesLeft = 10;
     currentGuesses = [];
+
     // ask user if they would like to play again (inquirer confirm)
     inquirer.prompt({
         name: 'playAgain',
@@ -184,6 +204,29 @@ function promptRestart() {
         } else {
             console.log(chalk.cyan.bold('\n\tSayonara~\n'));
         }
+    });
+}
+
+// prompt user to guess letter
+function askForGuess() {
+    inquirer.prompt(
+        {
+            name: 'guess',
+            type: 'input',
+            message: 'Guess a letter!',
+            // check if letter is a letter
+            validate: (value) => {
+                var alphabet = 'abcdefghijklmnopqrstuvwxyz';
+                if (alphabet.includes(value.toLowerCase())) {
+                    return true;
+                } else {
+                    console.log(chalk.red(' => Please enter a letter'));
+                    return false;
+                }
+            }
+        }
+    ).then((answer) => {
+        handleLetter(answer.guess);
     });
 }
 

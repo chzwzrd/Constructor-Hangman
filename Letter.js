@@ -1,6 +1,3 @@
-// import word module
-var inquirer = require('inquirer');
-
 // create Letter constructor
 function Letter(letter) {
     this.letter = letter;

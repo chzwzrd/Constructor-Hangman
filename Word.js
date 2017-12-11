@@ -1,4 +1,5 @@
-// require Letter constructor
+// require modules
+var inquirer = require('inquirer');
 var Letter = require('./Letter');
 
 // create Word constructor to represent current word user is guessing
