@@ -32,7 +32,7 @@ function displayNewWord() {
     for (var i = 0; i < currentWord.length; i++) {
         wordDisplay.push('_');
     }
-    console.log(`\n\t${wordDisplay.join(' ')}\n`);
+    console.log(chalk.blue.bold(`\n\t${wordDisplay.join(' ')}\n`));
 
 }
 
@@ -48,10 +48,12 @@ function checkRepeat(letter) {
     return currentGuesses.join('').includes(letter.toLowerCase());
 }
 
+// check if user has guesses left
 function checkGuesses(num) {
     return num > 1;
 }
 
+// check if user has guessed the full word
 function checkWin(word) {
     return word === currentWord;
 }
@@ -77,7 +79,7 @@ function handleLetter(letter) {
         // if letter has already been guessed
         if (hasBeenGuessed) {
 
-            console.log(chalk.blue.bold(`\n\tYou already guessed ${letter}!`));
+            console.log(chalk.cyan(`\n\tYou already guessed ${letter}!`));
             displayCurrentWord();
             askForGuess();
 
@@ -101,7 +103,7 @@ function handleLetter(letter) {
                     handleWin();
                 }
                 else {
-                    console.log(chalk.green('\n\tCORRECT!!!'));
+                    console.log(chalk.green(`\n\tCORRECT!!!`));
                     displayCurrentWord();
                     askForGuess();
                 }
@@ -144,18 +146,18 @@ function updateWord(letter) {
 
 // display the current underscores/letters
 function displayCurrentWord() {
-    console.log(`\n\t${wordDisplay.join(' ')}\n`);
+    console.log(chalk.blue.bold(`\n\t${wordDisplay.join(' ')}\n`));
 }
 
 // ------------------------------------------------------------------------------------
 
 function handleWin() {
-    console.log(chalk.blue.bold(`\n\tCongrats, you won!!! The word was '${currentWord}'.\n`));
+    console.log(chalk.cyan.bold(`\n\tCongrats, you won!!! The word was '${currentWord}'.\n`));
     promptRestart();
 }
 
 function handleLoss() {
-    console.log(chalk.blue.bold(`\n\tOh no! The word was '${currentWord}' ):\n`));
+    console.log(chalk.cyan.bold(`\n\tOh no! The word was '${currentWord}' ):\n`));
     promptRestart();
 }
 
@@ -169,7 +171,7 @@ function initGame() {
         {
             name: 'startGame',
             type: 'confirm',
-            message: 'Welcome to Constructor Hangman! Press enter to start playing.'
+            message: chalk.blue('Welcome to Constructor Hangman! Press enter to start playing.')
         }
     ).then((answer) => {
         // if they want to play, generate/display new word & ask them to guess letter
@@ -196,7 +198,7 @@ function promptRestart() {
     inquirer.prompt({
         name: 'playAgain',
         type: 'confirm',
-        message: 'Play again?'
+        message: chalk.blue.bold('Play again?')
     }).then((answer) => {
         if (answer.playAgain === true) {
             displayNewWord();
@@ -213,7 +215,7 @@ function askForGuess() {
         {
             name: 'guess',
             type: 'input',
-            message: 'Guess a letter!',
+            message: chalk.blue.bold('Guess a letter!'),
             // check if letter is a letter
             validate: (value) => {
                 var alphabet = 'abcdefghijklmnopqrstuvwxyz';
