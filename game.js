@@ -8,7 +8,6 @@ var Word = require('./Word');
 var wordBank = ['christmas', 'holiday', 'vacation', 'santa', 'reindeer', 'snow', 'rudolph', 'elf', 'presents', 'winter', 'carols', 'lights', 'wreath', 'sleigh', 'snowman'];
 
 var guessesLeft = 10;
-var currentGuesses = [];
 
 
 // FUNCTIONS
